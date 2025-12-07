@@ -34,53 +34,55 @@ int part1(vector<string>& input) {
     return times_split;
 }
 
+
 /** Part 2 - how many timelines will there be
  * intuition: seems like a graph problem, counting number of possibe paths
  * where the source is the source node, and a splitter is a vertex
  * if a beam doesn't hit another vertex, it is a leaf node
  * 
- * could use some kind of DP/DFS approach, where you recursively go left and right
- * counting the number of possible paths and then saveing the number of timelines
- * from a node so if it is encountered again it can be done
+ * could use some kind of DP/DFS approach, where you recursively go left and creating
+ * one new timeline each time you split. If a beam hits a splitter that has already been
+ * calculated we will know how may extra paths are possible
+ * 
+ * optimisation:
+ * by using a bottom up approach we can minimize memory usage by approaching the problem
+ * iteratively instead of recursively, while only keeping track of the most recent state
+ * instead of all visited states. 
+ * 
+ * intuition is as follows - when a beam splits, there will be two resultant timelines, 
+ * the left path will be assumed to be the current timeline, and the right path a new
+ * timeline. This means that when n beams hit a splitter, there will be 2 * n resultant
+ * timelines, the n original timelines going left, and the n new timelines going right.
+ * Therefore, this approach tracks the number of timelines at each index in the problem. When
+ * a splitter is hit, double the number of timelines by placing n timelines at index i - 1 (left)
+ * and n timelines at index i + 1 (right). This means that the total number of timelines will
+ * be the sum of all timelines after the final iteration.  
  * 
  * note to self - USE LONG LONG
  */
-
-long long helper(unordered_map<int, long long>& possible_splits, vector<string>& input, int i, int j) {
-    int hash_index = i * input[0].size() + j;
-    if (possible_splits.count(hash_index)) return possible_splits[hash_index];
-    long long paths = 0;
-    // cout << "beam starting at: " << i << ", " << j << endl;
-    /* iterate through input until splitter is found */
-    for (int k = i + 1; k < input.size(); k++) {
-        // cout << "checking: " << k << ", " << j << endl;
-        if (input[k][j] == '^') {
-            /* when splitter is found, recursively find left and right paths */
-            paths += helper(possible_splits, input, k, j - 1);
-            paths += helper(possible_splits, input, k, j + 1) + 1;
-            break;
+long long part2(vector<string>& input) {
+    vector<long long> beams(input[0].size());
+    beams[(input[0].find('S'))] = 1;
+    for (const auto& s : input) {
+        for (int i = 0; i < s.size(); i++) {
+            if (s[i] == '^') { //check if splitter and splite beam, timelines can overlap
+                if (i > 0) beams[i - 1] += beams[i];
+                if (i < s.size() - 1) beams[i + 1] += beams[i];
+                beams[i] = 0;
+            }   
         }
     }
-
-    return possible_splits[hash_index] = paths;
-} 
-
-long long part2(vector<string>& input) {
-    /* key will be j x max_height + i - this will give unique hashable key */
-    unordered_map<int, long long> possible_splits;
-    int source = input[0].find('S');
-
-    return helper(possible_splits, input, 0, source) + 1;
+    long long times_split = 0;
+    for (long long timelines : beams) times_split += timelines;
+    return times_split;
 }
-
-
 
 int main() {
     vector<string> input;
     string s;
     while (getline(cin, s)) input.push_back(s);
     int p1 = part1(input);
-    long p2 = part2(input);
+    long long p2 = part2(input);
     cout << "Number of times beam is split: " << p1 << "\n";
     cout << "Number of timelines possible: " << p2 << "\n";
 }
