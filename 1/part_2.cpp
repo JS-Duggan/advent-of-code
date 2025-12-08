@@ -32,7 +32,6 @@ int part_2 () {
         pos += rotation;
         if ((pos <= 0 || pos >= 100) && !at_zero) count++;
         pos = (pos + 100) % 100;
-        cout << s << ": " << pos << endl;
     }  
     return  count;
 }

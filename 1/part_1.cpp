@@ -16,7 +16,7 @@ int part_1 () {
     int pos = 50;
     for (string& s : input) {
         /* determine rotation direction and magnitude */
-        int rotation = stoi(s.substr(1));
+        int rotation = stoi(s.substr(1)) % 100;
         if (s[0] == 'L') rotation = -rotation;
 
         /* calculate position */
