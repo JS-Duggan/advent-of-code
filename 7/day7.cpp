@@ -60,20 +60,22 @@ int part1(vector<string>& input) {
  * 
  * note to self - USE LONG LONG
  */
-long long part2(vector<string>& input) {
-    vector<long long> beams(input[0].size());
+unsigned long part2(const vector<string>& input) {
+    vector<unsigned long> beams(input[0].size()) ;
     beams[(input[0].find('S'))] = 1;
     for (const auto& s : input) {
-        for (int i = 0; i < s.size(); i++) {
-            if (s[i] == '^') { //check if splitter and splite beam, timelines can overlap
+        int width = s.size();
+        for (int i = 0; i < width; i++) {
+            if (beams[i] == 0) continue;
+            if (s[i] == '^') {
                 if (i > 0) beams[i - 1] += beams[i];
                 if (i < s.size() - 1) beams[i + 1] += beams[i];
                 beams[i] = 0;
             }   
         }
     }
-    long long times_split = 0;
-    for (long long timelines : beams) times_split += timelines;
+    unsigned long times_split = 0;
+    for (unsigned long timelines : beams) times_split += timelines;
     return times_split;
 }
 
@@ -82,7 +84,7 @@ int main() {
     string s;
     while (getline(cin, s)) input.push_back(s);
     int p1 = part1(input);
-    long long p2 = part2(input);
+    unsigned long p2 = part2(input);
     cout << "Number of times beam is split: " << p1 << "\n";
     cout << "Number of timelines possible: " << p2 << "\n";
 }
